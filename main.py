@@ -15,4 +15,4 @@ def predict():
     result = model.predict(input_query)[0]
     return jsonify({'placement':str(result)})
 if __name__ == '__main__':
-    app.run(threaded=True, port=5000)
+    app.run(threaded=True, port=3000)
