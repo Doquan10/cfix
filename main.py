@@ -1,32 +1,18 @@
-import pandas as pd
-from flask import Flask, jsonify, request
+from flask import Flask,request,jsonify
+import numpy as np
 import pickle
-
-# load model
 model = pickle.load(open('finalized_model.sav','rb'))
-
-# app
 app = Flask(__name__)
-
-# routes
-@app.route('/', methods=['POST'])
-
+@app.route('/')
+def index():
+    return "Hello world"
+@app.route('/predict',methods=['POST'])
 def predict():
-    # get data
-    data = request.get_json(force=True)
-
-    # convert data into dataframe
-    data.update((x, [y]) for x, y in data.items())
-    data_df = pd.DataFrame.from_dict(data)
-
-    # predictions
-    result = model.predict(data_df)
-
-    # send back to browser
-    output = {'results': int(result[0])}
-
-    # return data
-    return jsonify(results=output)
-
+    cgpa = request.form.get('cgpa')
+    iq = request.form.get('iq')
+    profile_score = request.form.get('profile_score')
+    input_query = np.array([[cgpa,iq,profile_score]])
+    result = model.predict(input_query)[0]
+    return jsonify({'placement':str(result)})
 if __name__ == '__main__':
-    app.run(port = 5000, debug=True)
+    app.run(debug=True)
