@@ -1,27 +1,32 @@
-from flask import Flask, jsonify
-from flask_restful import Resource, Api
-from flask_cors import CORS
+import pandas as pd
+from flask import Flask, jsonify, request
+import pickle
 
+# load model
+model = pickle.load(open('finalized_model.sav','rb'))
+
+# app
 app = Flask(__name__)
-api = Api(app)
-CORS(app)
 
+# routes
+@app.route('/', methods=['POST'])
 
-class status (Resource):
-    def get(self):
-        try:
-            return {'data': 'Api is Running'}
-        except:
-            return {'data': 'An Error Occurred during fetching Api'}
+def predict():
+    # get data
+    data = request.get_json(force=True)
 
+    # convert data into dataframe
+    data.update((x, [y]) for x, y in data.items())
+    data_df = pd.DataFrame.from_dict(data)
 
-class Sum(Resource):
-    def get(self, a, b):
-        return jsonify({'data': a+b})
+    # predictions
+    result = model.predict(data_df)
 
+    # send back to browser
+    output = {'results': int(result[0])}
 
-api.add_resource(status, '/')
-api.add_resource(Sum, '/add/<int:a>,<int:b>')
+    # return data
+    return jsonify(results=output)
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port = 5000, debug=True)
