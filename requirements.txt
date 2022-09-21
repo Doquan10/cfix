@@ -2,4 +2,3 @@ flask
 numpy
 sklearn
 gunicorn
-web: gunicorn app:app
