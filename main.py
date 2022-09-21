@@ -1,18 +1,27 @@
-from flask import Flask,request,jsonify
-import numpy as np
-import pickle
-model = pickle.load(open('finalized_model.sav','rb'))
+from flask import Flask, jsonify
+from flask_restful import Resource, Api
+from flask_cors import CORS
+
 app = Flask(__name__)
-@app.route('/')
-def index():
-    return "Hello world"
-@app.route('/predict',methods=['POST'])
-def predict():
-    cgpa = request.form.get('cgpa')
-    iq = request.form.get('iq')
-    profile_score = request.form.get('profile_score')
-    input_query = np.array([[cgpa,iq,profile_score]])
-    result = model.predict(input_query)[0]
-    return jsonify({'placement':str(result)})
+api = Api(app)
+CORS(app)
+
+
+class status (Resource):
+    def get(self):
+        try:
+            return {'data': 'Api is Running'}
+        except:
+            return {'data': 'An Error Occurred during fetching Api'}
+
+
+class Sum(Resource):
+    def get(self, a, b):
+        return jsonify({'data': a+b})
+
+
+api.add_resource(status, '/')
+api.add_resource(Sum, '/add/<int:a>,<int:b>')
+
 if __name__ == '__main__':
-    app.run(threaded=True, port=3000)
+    app.run()
